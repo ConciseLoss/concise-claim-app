@@ -503,21 +503,37 @@
           `Notes: ${otherInfo || "None provided"}\n` +
           `----------------------------------------\n` +
           `Submitted via Concise Triage App`;
-
-        // Trigger mail client using mailto
-        const mailtoLink = `mailto:${TARGET_EMAIL}?subject=${encodeURIComponent(
-          subject
-        )}&body=${encodeURIComponent(body)}`;
-        window.location.href = mailtoLink;
-
+              // Send data to Netlify funciond      // Send data to Netlify function
+      const data = {
+        unitNumber,
+        ownerName,
+        ownerContact,
+        ownerEmail,
+        lesseeName,
+        lesseeContact,
+        lesseeEmail,
+        incidentDesc,
+        propertyDesc,
+        otherInfo
+      };
+      fetch('/.netlify/functions/sendEmail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
         // Show success view and hide form/footer
         document.getElementById("form-view").style.display = "none";
         document.getElementById("submit-footer").style.display = "none";
         document.getElementById("success-view").classList.remove("hidden");
-      }
-
-      function resetForm() {
-        // Reset all form fields
+      })
+      .catch(error => {
+        alert('There was an error submitting your claim. Please try again later.');
+        console.error(error);
+      });
         document.getElementById("unitNumber").value = "";
         document.getElementById("ownerName").value = "";
         document.getElementById("ownerContact").value = "";
