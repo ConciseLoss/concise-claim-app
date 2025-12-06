@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Concise Claim App</title>
+    <!-- Include Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+    <!-- Include Tailwind via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Apply Montserrat font globally */
+      body {
+        font-family: 'Montserrat', sans-serif;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-white">
+    <div id="root"></div>
+    <!-- React and application code -->
+    <script type="module">
+      import React, { useState } from 'https://esm.sh/react';
+      import ReactDOM from 'https://esm.sh/react-dom/client';
+      import {
+        Building,
+        User,
+        FileText,
+        Send,
+        CheckCircle,
+        AlertTriangle,
+        CloudRain,
+        Shield,
+        HelpCircle,
+      } from 'https://esm.sh/lucide-react';
+
+      const TARGET_EMAIL = 'elandre@conciseloss.co.za';
+
+      // Concise logo component
+      const ConciseLogo = () => (
+        <div className="flex flex-col items-center justify-center mb-8">
+          {/* Icon Symbol */}
+          <div className="mb-4">
+            <svg
+              width="80"
+              height="80"
+              viewBox="0 0 100 100"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle cx="50" cy="50" r="48" fill="black" />
+              {/* Upper chevron */}
+              <path
+                d="M50 25 L75 40 L50 55 L25 40 Z"
+                fill="white"
+                transform="translate(0, -5)"
+              />
+              {/* Lower chevron */}
+              <path
+                d="M50 45 L75 60 L50 75 L25 60 Z"
+                fill="white"
+                transform="translate(0, 5)"
+              />
+              {/* Middle connecting shapes */}
+              <path d="M25 40 L50 55 L50 60 L25 45 Z" fill="white" />
+              <path d="M75 60 L50 45 L50 40 L75 55 Z" fill="white" />
+            </svg>
+          </div>
+          {/* Text Logo */}
+          <div className="text-center">
+            <h1 className="text-4xl font-bold tracking-[0.1em] text-black mb-1">
+              CONCISE
+            </h1>
+            <p className="text-xs tracking-[0.35em] font-medium text-black uppercase">
+              LOSS ADJUSTERS
+            </p>
+          </div>
+        </div>
+      );
+
+      // Section header
+      const SectionTitle = ({ icon: Icon, title }) => (
+        <div className="flex items-center space-x-2 mb-4 mt-8 border-b-2 border-black pb-2">
+          <Icon size={20} className="text-black" />
+          <h3 className="font-bold text-sm uppercase tracking-widest text-black">
+            {title}
+          </h3>
+        </div>
+      );
+
+      // Input field component
+      const InputField = ({
+        label,
+        placeholder,
+        value,
+        onChange,
+        type = 'text',
+        required = false,
+      }) => (
+        <div className="mb-4">
+          <label className="block text-xs font-bold text-gray-500 uppercase mb-1 tracking-wide">
+            {label} {required && <span className="text-red-600">*</span>}
+          </label>
+          <input
+            type={type}
+            className="w-full p-4 bg-gray-50 border border-gray-200 focus:border-black focus:ring-1 focus:ring-black outline-none transition-all text-sm text-black placeholder-gray-400"
+            placeholder={placeholder}
+            value={value}
+            required={required}
+            onChange={(e) => onChange(e.target.value)}
+          />
+        </div>
+      );
+
+      // TextArea component
+      const TextArea = ({
+        label,
+        placeholder,
+        value,
+        onChange,
+        required = false,
+        helperTags = [],
+      }) => (
+        <div className="mb-6">
+          <label className="block text-xs font-bold text-gray-500 uppercase mb-1 tracking-wide">
+            {label} {required && <span className="text-red-600">*</span>}
+          </label>
+          <textarea
+            rows={4}
+            className="w-full p-4 bg-gray-50 border border-gray-200 focus:border-black focus:ring-1 focus:ring-black outline-none transition-all text-sm text-black placeholder-gray-400"
+            placeholder={placeholder}
+            value={value}
+            required={required}
+            onChange={(e) => onChange(e.target.value)}
+          />
+          {helperTags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {helperTags.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => onChange(value ? value + ', ' + tag : tag)}
+                  className="text-[10px] uppercase tracking-wide border border-gray-300 bg-white text-gray-600 hover:bg-black hover:text-white hover:border-black px-3 py-1 transition-colors"
+                >
+                  + {tag}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+
+      // Main app component
+      function ConciseClaimApp() {
+        const [submitted, setSubmitted] = useState(false);
+        const [formData, setFormData] = useState({
+          unitNumber: '',
+          ownerName: '',
+          lesseeName: '',
+          ownerContact: '',
+          ownerEmail: '',
+          lesseeContact: '',
+          lesseeEmail: '',
+          incidentDesc: '',
+          propertyDesc: '',
+          otherInfo: '',
+        });
+
+        const handleChange = (field, value) => {
+          setFormData((prev) => ({ ...prev, [field]: value }));
+        };
+
+        const requiredMissing =
+          !formData.unitNumber.trim() ||
+          !formData.incidentDesc.trim() ||
+          !formData.propertyDesc.trim();
+
+        const handleSubmit = () => {
+          if (requiredMissing) {
+            alert(
+              'Please ensure Unit Number, Incident Description, and Damage Description are all completed.'
+            );
+            return;
+          }
+
+          const subject = `New Claim: Unit ${formData.unitNumber} - Storm Damage`;
+          const body = `CONCISE LOSS ADJUSTERS - NEW CLAIM REPORT\n----------------------------------------\nUNIT DETAILS\nUnit Number: ${formData.unitNumber}\n\nOWNER DETAILS\nName: ${formData.ownerName || 'N/A'}\nContact: ${formData.ownerContact || 'N/A'}\nEmail: ${formData.ownerEmail || 'N/A'}\n\nLESSEE DETAILS (If Applicable)\nName: ${formData.lesseeName || 'N/A'}\nContact: ${formData.lesseeContact || 'N/A'}\nEmail: ${formData.lesseeEmail || 'N/A'}\n\nINCIDENT REPORT\nDescription: ${formData.incidentDesc}\n\nDAMAGE ASSESSMENT\nDamaged Items: ${formData.propertyDesc}\n\nOTHER INFORMATION (Urgency / Prevention)\nNotes: ${formData.otherInfo || 'None provided'}\n----------------------------------------\nSubmitted via Concise Triage App`;
+
+          window.location.href = `mailto:${TARGET_EMAIL}?subject=${encodeURIComponent(
+            subject
+          )}&body=${encodeURIComponent(body)}`;
+          setSubmitted(true);
+        };
+
+        if (submitted) {
+          return (
+            <div className="min-h-screen bg-white flex flex-col items-center justify-center p-8 text-center">
+              <div className="w-24 h-24 bg-black rounded-full flex items-center justify-center mb-6 shadow-xl">
+                <CheckCircle className="text-white" size={48} />
+              </div>
+              <h2 className="text-2xl font-bold tracking-widest text-black mb-4 uppercase">
+                Claim Logged
+              </h2>
+              <p className="text-gray-500 mb-8 max-w-xs mx-auto text-sm leading-relaxed">
+                The email draft has been created. Please ensure you press <strong>"Send"</strong> in your mail app to finalize the submission to {TARGET_EMAIL}.
+              </p>
+              <button
+                onClick={() => {
+                  setSubmitted(false);
+                  setFormData({
+                    unitNumber: '',
+                    ownerName: '',
+                    lesseeName: '',
+                    ownerContact: '',
+                    ownerEmail: '',
+                    lesseeContact: '',
+                    lesseeEmail: '',
+                    incidentDesc: '',
+                    propertyDesc: '',
+                    otherInfo: '',
+                  });
+                }}
+                className="bg-white border-2 border-black text-black px-8 py-4 font-bold uppercase tracking-widest text-xs hover:bg-black hover:text-white transition-colors w-full max-w-xs"
+              >
+                Lodge Another Unit
+              </button>
+            </div>
+          );
+        }
+
+        return (
+          <div className="min-h-screen bg-white pb-32">
+            {/* Header */}
+            <div className="bg-white pt-10 pb-6 px-6 shadow-sm border-b border-gray-100">
+              <ConciseLogo />
+              <div className="mt-4 bg-gray-50 border border-gray-200 p-3 text-center">
+                <h2 className="text-xs font-bold uppercase tracking-widest flex items-center justify-center text-gray-600">
+                  <AlertTriangle size={14} className="mr-2 text-black" />
+                  Claim Triage Platform
+                </h2>
+              </div>
+            </div>
+
+            {/* Main Content */}
+            <div className="p-6 max-w-lg mx-auto">
+              <p className="text-gray-400 text-xs italic mb-8 text-center">
+                Please complete all relevant fields to triage your storm related claim efficiently.
+              </p>
+
+              {/* Property Identity */}
+              <SectionTitle icon={Building} title="Property Identity" />
+              <InputField
+                label="Unit Number"
+                placeholder="e.g. Unit 42, Block B"
+                value={formData.unitNumber}
+                onChange={(v) => handleChange('unitNumber', v)}
+                required
+              />
+
+              {/* Owner Details */}
+              <SectionTitle icon={User} title="Owner Details" />
+              <InputField
+                label="Owner Full Name"
+                placeholder="Name & Surname"
+                value={formData.ownerName}
+                onChange={(v) => handleChange('ownerName', v)}
+              />
+              <div className="grid grid-cols-1 gap-0">
+                <InputField
+                  label="Owner Contact Number"
+                  type="tel"
+                  placeholder="+27 82 000 0000"
+                  value={formData.ownerContact}
+                  onChange={(v) => handleChange('ownerContact', v)}
+                />
+                <InputField
+                  label="Owner Email"
+                  type="email"
+                  placeholder="owner@example.com"
+                  value={formData.ownerEmail}
+                  onChange={(v) => handleChange('ownerEmail', v)}
+                />
+              </div>
+
+              {/* Lessee Details */}
+              <SectionTitle icon={User} title="Lessee Details" />
+              <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-4 -mt-2">
+                Only complete if unit is rented
+              </p>
+              <InputField
+                label="Lessee Full Name"
+                placeholder="Name & Surname"
+                value={formData.lesseeName}
+                onChange={(v) => handleChange('lesseeName', v)}
+              />
+              <div className="grid grid-cols-1 gap-0">
+                <InputField
+                  label="Lessee Contact Number"
+                  type="tel"
+                  placeholder="+27 72 000 0000"
+                  value={formData.lesseeContact}
+                  onChange={(v) => handleChange('lesseeContact', v)}
+                />
+                <InputField
+                  label="Lessee Email"
+                  type="email"
+                  placeholder="tenant@example.com"
+                  value={formData.lesseeEmail}
+                  onChange={(v) => handleChange('lesseeEmail', v)}
+                />
+              </div>
+
+              {/* Incident Description */}
+              <SectionTitle icon={CloudRain} title="Incident Report" />
+              <TextArea
+                label="Incident Description"
+                placeholder="Please describe exactly what happened..."
+                value={formData.incidentDesc}
+                onChange={(v) => handleChange('incidentDesc', v)}
+                required
+              />
+
+              <SectionTitle icon={FileText} title="Damage Assessment" />
+              <TextArea
+                label="Description of Property Damaged"
+                placeholder="List damaged items..."
+                value={formData.propertyDesc}
+                onChange={(v) => handleChange('propertyDesc', v)}
+                helperTags={[
+                  'Roof Tiles',
+                  'Ceiling',
+                  'Drywall',
+                  'Flooring',
+                  'Windows',
+                  'Electrical',
+                  'Water Damage',
+                ]}
+                required
+              />
+
+              {/* Other Information */}
+              <SectionTitle icon={HelpCircle} title="Other Information" />
+              <TextArea
+                label="Urgency & Prevention Notes"
+                placeholder="Any information related to urgency or prevention of further damages..."
+                value={formData.otherInfo}
+                onChange={(v) => handleChange('otherInfo', v)}
+                helperTags={[
+                  'Exposed wiring',
+                  'Leaking active',
+                  'Security risk',
+                  'Uninhabitable',
+                ]}
+              />
+
+              {/* Disclaimer & Thanks */}
+              <div className="mt-8 mb-4 p-5 bg-gray-50 border-l-4 border-black text-xs text-gray-500 leading-relaxed text-justify">
+                <div className="flex items-start mb-2">
+                  <Shield size={16} className="shrink-0 mr-2 text-black" />
+                  <strong className="text-black uppercase tracking-wide">Disclaimer</strong>
+                </div>
+                By submitting this form, you confirm the correctness of the information provided. You acknowledge that all information submitted will only be used for purposes of claim investigation and insurance related purposes.
+                <p className="mt-4 text-center font-bold text-black uppercase tracking-widest">Thank you for your assistance.</p>
+              </div>
+            </div>
+
+            {/* Footer / Submit */}
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 z-20">
+              <button
+                onClick={handleSubmit}
+                disabled={requiredMissing}
+                className={`w-full bg-black text-white font-bold uppercase tracking-[0.2em] text-sm py-4 shadow-lg flex items-center justify-center transition-all ${
+                  requiredMissing
+                    ? 'opacity-60 cursor-not-allowed'
+                    : 'hover:bg-gray-800 active:scale-[0.98]'
+                }`}
+              >
+                Submit Report <Send size={16} className="ml-3" />
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById('root')).render(
+        <React.StrictMode>
+          <ConciseClaimApp />
+        </React.StrictMode>
+      );
+    </script>
+  </body>
+</html>
