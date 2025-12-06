@@ -1,7 +1,7 @@
 {
   "name": "concise-claim-app",
   "version": "1.0.0",
-  "dependencies": {
-    "@sendgrid/mail": "^7.9.3"
+ "dependencies": {
+    "@sendgrid/mail": "^8.1.6"
   }
 }
